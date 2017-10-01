@@ -1,0 +1,12 @@
+{
+  "name": "osc-relay",
+  "version": "1.0.0",
+  "description": "relay osc over websocket server",
+  "main": "index.js",
+  "repository": "https://github.com/calopter/osc-relay",
+  "author": "Aidan <calopter@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^3.2.0"
+  }
+}
