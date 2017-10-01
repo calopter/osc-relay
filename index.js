@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
-const port = process.env.PORT || 8000;
 
+const port = process.env.PORT || 8000;
 const wss = new WebSocket.Server({ port });
 
 function heartbeat() {
