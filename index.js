@@ -1,26 +1,14 @@
 const WebSocket = require('ws');
-const express = require('express');
-const http = require('http');
-
-const app = express();
 const port = process.env.PORT || 8000;
 
-app.get('/', function(req, res) {
-	res.send('Hello World');
-});
-
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-
-server.listen(port, function () {
-  console.log('Listening on %d', server.address().port)
-});
+const wss = new WebSocket.Server({ port });
 
 function heartbeat() {
   this.isAlive = true;
 }
 
 wss.on('connection', function (ws) {
+  ws.send('heroku ws got a client');
   ws.isAlive = true;
   ws.on('pong', heartbeat);
 
@@ -33,8 +21,6 @@ wss.on('connection', function (ws) {
       }
     });
   });
-
-  ws.send('heroku ws got a client');
 });
 
 const interval = setInterval(function ping() {
