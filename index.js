@@ -26,6 +26,12 @@ wss.on('connection', function (ws) {
 
   ws.on('message', function (message) {
     console.log('received: %s', message);
+
+    wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(data);
+      }
+    });
   });
 
   ws.send('heroku ws got a client');
