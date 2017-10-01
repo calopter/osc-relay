@@ -1,14 +1,16 @@
 const WebSocket = require('ws');
 const express = require('express');
 
-const app = express.createServer();
+const app = express();
 const port = process.env.PORT;
 
 app.get('/', function(req, res) {
 	res.send('Hello World');
 });
 
-app.listen(port);
+app.listen(port, function () {
+  console.log('started express')}
+);
 
 const wss = new WebSocket.Server({ port: port });
 
