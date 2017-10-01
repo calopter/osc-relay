@@ -6,6 +6,9 @@
   "repository": "https://github.com/calopter/osc-relay",
   "author": "Aidan <calopter@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "ws": "^3.2.0"
   }
