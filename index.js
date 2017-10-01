@@ -16,11 +16,26 @@ server.listen(port, function () {
   console.log('Listening on %d', server.address().port)
 });
 
+function heartbeat() {
+  this.isAlive = true;
+}
+
 wss.on('connection', function (ws) {
+  ws.isAlive = true;
+  ws.on('pong', heartbeat);
+
   ws.on('message', function (message) {
     console.log('received: %s', message);
-    ws.send('heroku heard: %s', message);
   });
 
   ws.send('heroku ws got a client');
 });
+
+const interval = setInterval(function ping() {
+  wss.clients.forEach(function each(ws) {
+    if (ws.isAlive === false) return ws.terminate();
+
+    ws.isAlive = false;
+    ws.ping('', false, true);
+  });
+}, 30000);
