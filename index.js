@@ -47,7 +47,6 @@ wss.on("connection", function (socket, req) {
     });
 });
 
-
 // Ping Pong Code
 const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws) {
