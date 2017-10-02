@@ -9,7 +9,7 @@ function heartbeat() {
 }
 
 wss.on('connection', function (ws) {
-  var oscSocket = new osc.WebSocketPort({
+  var oscSocket = osc.WebSocketPort({
       socket: ws
   });
 
