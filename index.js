@@ -8,7 +8,7 @@ function heartbeat() {
 }
 
 wss.on('connection', function (ws) {
-    ws.send('heroku ws got a client');
+    //ws.send('heroku ws got a client');
     ws.isAlive = true;
     ws.on('pong', heartbeat);
 
