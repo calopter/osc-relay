@@ -10,6 +10,7 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "osc": "^2.2.0",
     "ws": "^3.2.0"
   }
 }

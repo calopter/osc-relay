@@ -8,17 +8,25 @@ function heartbeat() {
 }
 
 wss.on('connection', function (ws) {
-  ws.send('heroku ws got a client');
+  var oscSocket = new osc.WebSocketPort({
+      socket: ws
+  });
+
+  oscSocket.on("message", function (oscMsg) {
+      console.log("An OSC Message was received!", oscMsg);
+
+      wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === WebSocket.OPEN) {
+        client.send(message);
+      }
+  });
+  
   ws.isAlive = true;
   ws.on('pong', heartbeat);
 
   ws.on('message', function (message) {
     console.log('received: %s', message);
 
-    wss.clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
     });
   });
 });

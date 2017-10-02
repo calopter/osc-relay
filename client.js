@@ -1,6 +1,21 @@
 const WebSocket = require('ws');
+const osc = require('osc');
 
 const ws = new WebSocket('https://osc-relay.herokuapp.com/');
+
+////////////////////////////////////////////////////////////////
+
+wss.on("connection", function (socket) {
+    var socketPort = new osc.WebSocketPort({
+        socket: socket
+    });
+ 
+    socketPort.on("message", function (oscMsg) {
+        console.log("An OSC Message was received!", oscMsg);
+    });
+});
+
+///////////////////////////////////////////////////////////////
 
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
@@ -16,6 +31,7 @@ process.stdin.on('data', function(message) {
 
 ws.on('message', function(message) {
   console.log('Received: ' + message);
+//  udpPort.send(message);
 });
 
 ws.on('close', function(code) {
