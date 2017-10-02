@@ -1,24 +1,33 @@
 const WebSocket = require('ws');
-const express = require('express');
 
-const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
+const wss = new WebSocket.Server({ port });
 
-app.get('/', function(req, res) {
-	res.send('Hello World');
-});
-
-app.listen(port, function () {
-  console.log('started express')}
-);
-
-const wss = new WebSocket.Server({ port: port });
+function heartbeat() {
+    this.isAlive = true;
+}
 
 wss.on('connection', function (ws) {
-  ws.on('message', function (message) {
-    console.log('received: %s', message);
-    ws.send('heroku heard: %s', message);
-  });
+    ws.send('heroku ws got a client');
+    ws.isAlive = true;
+    ws.on('pong', heartbeat);
 
-  ws.send('heroku ws got a client');
+    ws.on('message', function (message) {
+        console.log('received: %s', message);
+
+        wss.clients.forEach(function each(client) {
+            if (client !== ws && client.readyState === WebSocket.OPEN) {
+                client.send(message);
+            }
+        });
+    });
 });
+
+const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+        if (ws.isAlive === false) return ws.terminate();
+
+        ws.isAlive = false;
+        ws.ping('', false, true);
+    });
+}, 30000);

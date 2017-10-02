@@ -10,8 +10,9 @@ ws.on('open', function open() {
 });
 
 process.stdin.on('data', function(message) {
-  message = message.trim();
-  ws.send(message, console.log.bind(null, 'Sent : ', message));
+    message = message.trim();
+    ws.send(message);
+    //console.log("\nMe: ")
 });
 
 ws.on('message', function(message) {
