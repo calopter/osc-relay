@@ -6,12 +6,14 @@ process.stdin.resume();
 process.stdin.setEncoding('utf8');
 
 ws.on('open', function open() {
-  ws.send('ws opened');
+    ws.send('ws opened');
+
 });
 
 process.stdin.on('data', function(message) {
-  message = message.trim();
-  ws.send(message, console.log.bind(null, 'Sent : ', message));
+    message = message.trim();
+    ws.send(message);
+    //console.log("\nMe: ")
 });
 
 ws.on('message', function(message) {
