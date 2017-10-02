@@ -8,40 +8,40 @@ process.stdin.resume();
 process.stdin.setEncoding('utf8');
 
 // Check if user has a name
-usernameSet = process.env.OSC_NAME_SET || "false";
+usernameSet = process.env.OSC_NAME_SET || false;
 username = process.env.OSC_NAME || "Unkown";
 
 var devMode = false;
 var ws = null; //yes....*null*!!!
+var oscPort = null;
 
 // Parse command-line args. Will move into a function when necessary.
 if (process.argv[2] == "-d") {
     devMode = true;
-    var ws = new WebSocket('ws://localhost:8000');
+    oscPort = new osc.WebSocketPort({
+        url: "ws://localhost:8000"
+    });
 } else {
-    ws = new WebSocket('https://osc-relay.herokuapp.com/');
+     oscPort = new osc.WebSocketPort({
+         url: 'https://osc-relay.herokuapp.com/'
+    });
+   // ws = new WebSocket('https://osc-relay.herokuapp.com/');
 }
 
-var oscPort = new osc.WebSocketPort({
-    url: "ws://localhost:8000"
-});
-
+// Open a port for OSC communication
 oscPort.open();
 
-// Send an open notification
-ws.on('open', function open() {
-    oscPort.on("ready", function () {
-        console.log("OSC port is ready and open.");
-        oscPort.send({
-            address: "/user/" + username + "/status",
-            args: "connected"
-        });
+// Send a connection  notification
+oscPort.on("ready", function () {
+    console.log("OSC port is ready and open.");
+    oscPort.send({
+        address: "/user/" + username + "/status",
+        args: "connected"
     });
 });
 
+
 // After enter is pressed on std, send the message to the websocket.
-
-
 process.stdin.on('data', function(message) {
     message = message.trim();
     var name = "";
@@ -56,8 +56,7 @@ process.stdin.on('data', function(message) {
         args: message
     });
     }
- });
-
+});
 
 oscPort.on("osc", function (oscMsg) {
     if (oscMsg.address== "/user/" + username + "/instructions/"){
@@ -67,17 +66,3 @@ oscPort.on("osc", function (oscMsg) {
     }
 });
 
-// Display broadcasted messages in cyan
-/*
-ws.on('message', function(message) {
-    console.log('\x1b[36m%s\x1b[0m', message);
-});*/
-
-ws.on('close', function(code) {
-    console.log('Disconnected: ' + code);
-    oscPort.close();
-});
-
-ws.on('error', function(error) {
-  console.log('Error: ' + error.code);
-});
