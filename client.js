@@ -1,6 +1,7 @@
 // Deps
 const WebSocket = require('ws');
 var prompt = require('prompt');
+const osc = require('osc');
 
 // Encoding
 process.stdin.resume();
@@ -21,33 +22,60 @@ if (process.argv[2] == "-d") {
     ws = new WebSocket('https://osc-relay.herokuapp.com/');
 }
 
+var oscPort = new osc.WebSocketPort({
+    url: "ws://localhost:8000"
+});
+
+oscPort.open();
 
 // Send an open notification
 ws.on('open', function open() {
-    ws.send('ws opened');
+    oscPort.on("ready", function () {
+        console.log("OSC port is ready and open.");
+        oscPort.send({
+            address: "/user/" + username + "/status",
+            args: "connected"
+        });
+    });
 });
 
 // After enter is pressed on std, send the message to the websocket.
+
+
 process.stdin.on('data', function(message) {
     message = message.trim();
+    var name = "";
     if (usernameSet == false) {
         console.log("Username will be set to " + message + " for this session.\n");
         console.log("To set a perminant username, set the OSC_NAME_SET(boolean) & OSC_NAME (string) variables.")
         username = message;
         usernameSet = true;
     } else {
-    name = "@" + username + ": ";
-        ws.send(name + message);
+    oscPort.send({
+        address: "/user/" + username + "/instructions/",
+        args: message
+    });
+    }
+ });
+
+
+oscPort.on("osc", function (oscMsg) {
+    if (oscMsg.address== "/user/" + username + "/instructions/"){
+        return;
+    } else {
+        console.log(oscMsg);
     }
 });
 
 // Display broadcasted messages in cyan
+/*
 ws.on('message', function(message) {
     console.log('\x1b[36m%s\x1b[0m', message);
-});
+});*/
 
 ws.on('close', function(code) {
-  console.log('Disconnected: ' + code);
+    console.log('Disconnected: ' + code);
+    oscPort.close();
 });
 
 ws.on('error', function(error) {

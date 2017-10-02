@@ -1,25 +1,27 @@
 const WebSocket = require('ws');
-
+const osc = require("osc");
 const port = process.env.PORT || 8000;
 const wss = new WebSocket.Server({ port });
-
+var ports = [];
 function heartbeat() {
     this.isAlive = true;
 }
 
-wss.on('connection', function (ws) {
-    //ws.send('heroku ws got a client');
-    ws.isAlive = true;
-    ws.on('pong', heartbeat);
+// Listen for Web Socket connections. 
+wss.on("connection", function (socket) {
+    socket.isAlive = true;
+    socket.on('pong', heartbeat);
+    var socketPort = new osc.WebSocketPort({
+        socket: socket
+    });
+    ports.push(socketPort);
+    console.log( "number of ports (doubled): " + ports.length);
+    socketPort.on("message", function (oscMsg) {
+        console.log("An OSC Message was received!", oscMsg);
 
-    ws.on('message', function (message) {
-        console.log('received: %s', message);
-
-        wss.clients.forEach(function each(client) {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
+        for (i = 0; i < ports.length; i++){
+            ports[i].send(oscMsg);
+        }
     });
 });
 
