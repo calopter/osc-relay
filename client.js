@@ -1,33 +1,29 @@
 const WebSocket = require('ws');
 
-const port = process.env.PORT || 8000;
-const wss = new WebSocket.Server({ port });
+const ws = new WebSocket('https://osc-relay.herokuapp.com/');
 
-function heartbeat() {
-    this.isAlive = true;
-}
+process.stdin.resume();
+process.stdin.setEncoding('utf8');
 
-wss.on('connection', function (ws) {
-    ws.send('heroku ws got a client');
-    ws.isAlive = true;
-    ws.on('pong', heartbeat);
+ws.on('open', function open() {
+    ws.send('ws opened');
 
-    ws.on('message', function (message) {
-        console.log('received: %s', message);
-
-        wss.clients.forEach(function each(client) {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
-    });
 });
 
-const interval = setInterval(function ping() {
-    wss.clients.forEach(function each(ws) {
-        if (ws.isAlive === false) return ws.terminate();
+process.stdin.on('data', function(message) {
+    message = message.trim();
+    ws.send(message);
+    //console.log("\nMe: ")
+});
 
-        ws.isAlive = false;
-        ws.ping('', false, true);
-    });
-}, 30000);
+ws.on('message', function(message) {
+  console.log('Received: ' + message);
+});
+
+ws.on('close', function(code) {
+  console.log('Disconnected: ' + code);
+});
+
+ws.on('error', function(error) {
+  console.log('Error: ' + error.code);
+});
